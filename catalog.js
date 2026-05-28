@@ -6,4 +6,7 @@ window.DESIGN_CATALOG = [
   { id: "asij_patchwork_tank", name: "ASIJ Patchwork Tank", image: "./mockups/asij_patchwork_tank.png" },
   { id: "senior_hoodie", name: "Senior Hoodie", image: "./mockups/senior_hoodie.png" },
   { id: "senior_pants", name: "Senior Pants", image: "./mockups/senior_pants.png" },
+  { id: "pov_shirt", name: "Senior Pants", image: "./mockups/pov_shirt.png" },
+  { id: "AP_exam_survivor_shirt", name: "Senior Pants", image: "./mockups/AP_exam_survivor_shirt.png" },
+  { id: "athleisure_longsleeve", name: "Senior Pants", image: "./mockups/athleisure_longsleeve.png" },
 ];
