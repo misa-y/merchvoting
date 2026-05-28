@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Merch Voting Results</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell admin-shell">
+      <section class="workspace" aria-label="Merch voting results">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">ASIJ Mustang Market</p>
+            <h1>Results</h1>
+          </div>
+          <button id="exportResults" class="small-button" type="button">Export JSON</button>
+        </header>
+
+        <section class="admin-grid">
+          <div class="scoreboard">
+            <div>
+              <span id="totalVotes">0</span>
+              <p>Total votes</p>
+            </div>
+            <div>
+              <span id="roundCount">0</span>
+              <p>Rounds</p>
+            </div>
+          </div>
+          <div id="resultsList" class="results-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./catalog.js"></script>
+    <script src="./admin.js"></script>
+  </body>
+</html>
