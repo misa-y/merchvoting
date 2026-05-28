@@ -2,7 +2,7 @@ const STORAGE_KEY = "merch-mockup-voter:v1";
 const DB_NAME = "merch-mockup-voter";
 const DB_STORE = "state";
 const DB_VERSION = 1;
-const DESIGN_CATALOG = window.DESIGN_CATALOG || [];
+let DESIGN_CATALOG = [];
 
 let db = null;
 let state = {
@@ -37,6 +37,23 @@ function dbGet(key) {
 
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+  });
+}
+
+function loadCatalog() {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = `./catalog.js?v=${Date.now()}`;
+    script.onload = () => {
+      DESIGN_CATALOG = Array.isArray(window.DESIGN_CATALOG) ? window.DESIGN_CATALOG : [];
+      resolve();
+    };
+    script.onerror = () => {
+      DESIGN_CATALOG = Array.isArray(window.DESIGN_CATALOG) ? window.DESIGN_CATALOG : [];
+      console.error("Could not load catalog.js");
+      resolve();
+    };
+    document.head.append(script);
   });
 }
 
@@ -128,6 +145,7 @@ function exportResults() {
 }
 
 async function init() {
+  await loadCatalog();
   db = await openDatabase();
   const saved = await dbGet(STORAGE_KEY);
   state = {
