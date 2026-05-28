@@ -2,7 +2,7 @@ const STORAGE_KEY = "merch-mockup-voter:v1";
 const DB_NAME = "merch-mockup-voter";
 const DB_STORE = "state";
 const DB_VERSION = 1;
-const DESIGN_CATALOG = window.DESIGN_CATALOG || [];
+let DESIGN_CATALOG = [];
 
 let designs = [];
 let currentIndex = 0;
@@ -48,6 +48,23 @@ function dbSet(key, value) {
     tx.objectStore(DB_STORE).put(value, key);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+  });
+}
+
+function loadCatalog() {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = `./catalog.js?v=${Date.now()}`;
+    script.onload = () => {
+      DESIGN_CATALOG = Array.isArray(window.DESIGN_CATALOG) ? window.DESIGN_CATALOG : [];
+      resolve();
+    };
+    script.onerror = () => {
+      DESIGN_CATALOG = Array.isArray(window.DESIGN_CATALOG) ? window.DESIGN_CATALOG : [];
+      console.error("Could not load catalog.js");
+      resolve();
+    };
+    document.head.append(script);
   });
 }
 
@@ -349,7 +366,8 @@ window.merchVotingAdmin = {
   }),
 };
 
-loadState()
+loadCatalog()
+  .then(loadState)
   .catch((error) => {
     console.error("Could not load voting state", error);
     designs = hydrateDesigns(null);
