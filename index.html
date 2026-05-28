@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Merch Mockup Voting</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="Merch voting workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">ASIJ Mustang Market</p>
+            <h1>New Designs</h1>
+          </div>
+        </header>
+
+        <div class="kiosk-grid">
+          <section class="voting-area" aria-label="Swipe voting">
+            <div class="deck-wrap">
+              <div id="emptyState" class="empty-state">
+                <div class="empty-mark">!</div>
+                <h2>No designs configured</h2>
+                <p>Add designs to catalog.js, then refresh this screen.</p>
+              </div>
+
+              <article id="voteCard" class="vote-card hidden" aria-live="polite">
+                <div id="voteBadge" class="vote-badge"></div>
+                <img id="mockupImage" alt="">
+                <div class="card-footer">
+                  <h2 id="designName"></h2>
+                  <p id="cardPosition"></p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="./catalog.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
