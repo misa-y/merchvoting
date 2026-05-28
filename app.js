@@ -208,13 +208,7 @@ function render() {
 }
 
 function updateDragBadge(deltaX, deltaY) {
-  const absX = Math.abs(deltaX);
-  const absY = Math.abs(deltaY);
-  let type = "";
-
-  if (deltaY < -70 && absY > absX * 0.8) type = "love";
-  if (deltaX > 70 && absX >= absY) type = "like";
-  if (deltaX < -70 && absX >= absY) type = "reject";
+  const type = getSwipeIntent(deltaX, deltaY, 70);
 
   if (!type) {
     els.voteBadge.className = "vote-badge";
@@ -226,12 +220,58 @@ function updateDragBadge(deltaX, deltaY) {
   els.voteBadge.className = `vote-badge show ${type}`;
 }
 
+function getSwipeIntent(deltaX, deltaY, threshold) {
+  const absX = Math.abs(deltaX);
+  const absY = Math.abs(deltaY);
+
+  if (deltaY < -threshold && absY > absX * 0.85) return "love";
+  if (deltaX > threshold && absX > absY * 0.75) return "like";
+  if (deltaX < -threshold && absX > absY * 0.75) return "reject";
+  return "";
+}
+
+function getSwipeResult() {
+  if (!dragStart) return "";
+
+  const last = dragStart.points.at(-1) || dragStart;
+  const deltaX = last.x - dragStart.x;
+  const deltaY = last.y - dragStart.y;
+  const directIntent = getSwipeIntent(deltaX, deltaY, 110);
+
+  if (directIntent) return directIntent;
+
+  const farthest = dragStart.points.reduce(
+    (max, point) => {
+      const moveX = point.x - dragStart.x;
+      const moveY = point.y - dragStart.y;
+      return {
+        right: Math.max(max.right, moveX),
+        left: Math.min(max.left, moveX),
+        up: Math.min(max.up, moveY),
+      };
+    },
+    { right: 0, left: 0, up: 0 },
+  );
+
+  const horizontalReach = Math.max(farthest.right, Math.abs(farthest.left));
+  const verticalReach = Math.abs(farthest.up);
+
+  if (verticalReach > 145 && verticalReach > horizontalReach * 0.9) return "love";
+  if (farthest.right > 145 && farthest.right > Math.abs(farthest.left) * 1.25) return "like";
+  if (Math.abs(farthest.left) > 145 && Math.abs(farthest.left) > farthest.right * 1.25) return "reject";
+
+  return "";
+}
+
 function onPointerDown(event) {
   if (!activeDesign() || event.target === els.designName) return;
+  event.preventDefault();
+
   dragStart = {
     pointerId: event.pointerId,
     x: event.clientX,
     y: event.clientY,
+    points: [{ x: event.clientX, y: event.clientY }],
   };
   els.voteCard.setPointerCapture(event.pointerId);
   els.voteCard.classList.add("dragging");
@@ -239,10 +279,12 @@ function onPointerDown(event) {
 
 function onPointerMove(event) {
   if (!dragStart || event.pointerId !== dragStart.pointerId) return;
+  event.preventDefault();
 
   const deltaX = event.clientX - dragStart.x;
   const deltaY = event.clientY - dragStart.y;
   const rotation = deltaX / 18;
+  dragStart.points.push({ x: event.clientX, y: event.clientY });
   els.voteCard.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) rotate(${rotation}deg)`;
   updateDragBadge(deltaX, deltaY);
 }
@@ -250,25 +292,14 @@ function onPointerMove(event) {
 function onPointerUp(event) {
   if (!dragStart || event.pointerId !== dragStart.pointerId) return;
 
-  const deltaX = event.clientX - dragStart.x;
-  const deltaY = event.clientY - dragStart.y;
-  const absX = Math.abs(deltaX);
-  const absY = Math.abs(deltaY);
+  event.preventDefault();
+  dragStart.points.push({ x: event.clientX, y: event.clientY });
+  const result = getSwipeResult();
   dragStart = null;
   els.voteCard.classList.remove("dragging");
 
-  if (deltaY < -110 && absY > absX * 0.8) {
-    vote("love");
-    return;
-  }
-
-  if (deltaX > 110 && absX >= absY) {
-    vote("like");
-    return;
-  }
-
-  if (deltaX < -110 && absX >= absY) {
-    vote("reject");
+  if (result) {
+    vote(result);
     return;
   }
 
@@ -324,3 +355,4 @@ loadState()
     designs = hydrateDesigns(null);
   })
   .finally(render);
+```
