@@ -9,4 +9,6 @@ window.DESIGN_CATALOG = [
   { id: "pov_shirt", name: "POV Shirt", image: "./pov_shirt.png" },
   { id: "AP_exam_survivor_shirt", name: "AP Exam Survivor Shirt", image: "./AP_exam_survivor_shirt.png" },
   { id: "athleisure_longsleeve", name: "Athleisure Longsleeve", image: "./athleisure_longsleeve.png" },
+  { id: "asij_fleece", name: "ASIJ Fleece", image: "./asij_fleece.png" },
+  { id: "asij_sweatpants", name: "ASIJ Sweatpants", image: "./asij_sweatpants.png" },
 ];
