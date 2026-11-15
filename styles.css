@@ -1,15 +1,16 @@
 :root {
   color-scheme:light;
-  --bg:#f4f2ec;
+  --bg:#faf9f5;
   --surface:#fff;
-  --ink:#20251f;
-  --muted:#697065;
-  --line:#dedfd6;
-  --green:#2f6454;
-  --reject:#b84747;
-  --like:#2f8f73;
-  --love:#b14c83;
-  --accent:#2356d7;
+  --ink:#171717;
+  --muted:#66635c;
+  --line:#e3dfd2;
+  --brand-ink:#171717;
+  --mustang-yellow:#f4cf46;
+  --reject:#333333;
+  --like:#6b5200;
+  --love:#6b5200;
+  --accent:#9b7400;
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   color:var(--ink);
   background:var(--bg);
@@ -19,7 +20,7 @@
 }
 body {
   margin:0;
-  background:radial-gradient(ellipse at 95% 0,rgba(47,143,115,.06),transparent 60%),var(--bg);
+  background:var(--bg);
 }
 button,select {
   font:inherit;
@@ -61,7 +62,7 @@ h1 {
   font-weight:650;
 }
 h1 span {
-  color:var(--green);
+  color:var(--brand-ink);
 }
 h2 {
   font-size:25px;
@@ -100,7 +101,7 @@ h3 {
   margin-top:2px;
 }
 .brand-mark {
-  background:var(--green);
+  background:var(--brand-ink);
   color:white;
   width:40px;
   height:42px;
@@ -131,8 +132,8 @@ nav a {
   border-radius:5px;
 }
 nav a.active {
-  background:#e4e9df;
-  color:var(--green);
+  background:#fff0b4;
+  color:var(--brand-ink);
   font-weight:650;
 }
 .lab-badge {
@@ -147,7 +148,7 @@ nav a.active {
   font-size:11px;
   font-weight:500;
   letter-spacing:0;
-  border:1px solid #cbd1c2;
+  border:1px solid #ddd5bb;
   padding:5px 8px;
   border-radius:4px;
   color:var(--muted);
@@ -163,7 +164,7 @@ nav a.active {
   font-size:10px;
   letter-spacing:1.5px;
   font-weight:700;
-  color:var(--green);
+  color:var(--brand-ink);
 }
 .intro .eyebrow {
   margin-bottom:12px;
@@ -178,7 +179,7 @@ nav a.active {
   background:white;
   border:1px solid var(--line);
   border-radius:12px;
-  box-shadow:0 12px 35px #253c2510;
+  box-shadow:0 12px 35px #1717170d;
   overflow:hidden;
 }
 .collection-bar {
@@ -199,11 +200,11 @@ nav a.active {
   place-items:center;
   width:23px;
   height:23px;
-  border:1px solid #d6ddcf;
+  border:1px solid #ded7bd;
   border-radius:50%;
   font-size:10px;
   letter-spacing:0;
-  color:var(--green);
+  color:var(--brand-ink);
   margin-right:5px;
 }
 .collection-bar label {
@@ -211,7 +212,7 @@ nav a.active {
 }
 .collection-bar select {
   border:0;
-  background:#f2f4ef;
+  background:#f7f4e9;
   border-radius:5px;
   padding:8px 32px 8px 12px;
   max-width:380px;
@@ -228,7 +229,7 @@ nav a.active {
 }
 .preview-column {
   min-width:0;
-  background:#f1f2ed;
+  background:#f5f4ef;
   padding:18px 28px 12px;
   overflow:hidden;
 }
@@ -248,7 +249,7 @@ nav a.active {
   width:6px;
   height:6px;
   border-radius:50%;
-  background:var(--green);
+  background:var(--brand-ink);
   margin-right:4px;
 }
 .deck-wrap {
@@ -345,9 +346,9 @@ legend span {
   font-size:11px;
 }
 .choice[aria-pressed=true] {
-  border-color:var(--green);
-  background:#edf3ec;
-  box-shadow:0 0 0 1px var(--green);
+  border-color:var(--brand-ink);
+  background:#fff1b5;
+  box-shadow:0 0 0 1px var(--brand-ink);
 }
 .color .choice {
   border:1px solid transparent;
@@ -360,7 +361,7 @@ legend span {
   min-width:47px;
 }
 .color .choice[aria-pressed=true] {
-  border-color:var(--green);
+  border-color:var(--brand-ink);
   box-shadow:none;
 }
 .swatch {
@@ -374,8 +375,8 @@ legend span {
   min-width:46px;
 }
 .concept {
-  background:#f4f5ef;
-  border:1px dashed #d5dacc;
+  background:#fffaf0;
+  border:1px dashed #e0d6b5;
   border-radius:7px;
   padding:8px 14px;
   display:flex;
@@ -426,18 +427,18 @@ legend span {
 }
 .vote-button.reject {
   color:var(--reject);
-  background:#fcf3f0;
-  border-color:#eed9d3;
+  background:#f7f7f7;
+  border-color:#dedede;
 }
 .vote-button.like {
   color:var(--like);
-  background:#eef5ef;
-  border-color:#d4e6d7;
+  background:#fff9e4;
+  border-color:#e7d48a;
 }
 .vote-button.love {
   color:white;
-  background:var(--green);
-  border-color:var(--green);
+  background:var(--brand-ink);
+  border-color:var(--brand-ink);
 }
 .vote-note {
   font-size:9px;
@@ -481,14 +482,14 @@ legend span {
   color:var(--muted);
 }
 .page-footer>p:first-child {
-  color:var(--green);
+  color:var(--brand-ink);
 }
 .status {
   position:fixed;
   bottom:18px;
   left:50%;
   transform:translateX(-50%);
-  background:var(--green);
+  background:var(--brand-ink);
   color:white;
   box-shadow:0 4px 24px #0002;
   padding:12px 20px;
@@ -520,7 +521,7 @@ legend span {
   border:1px solid var(--line);
   padding:3px;
   border-radius:6px;
-  background:#e9ebe3;
+  background:#eeece5;
 }
 .segmented button {
   border:0;
@@ -532,7 +533,7 @@ legend span {
 }
 .segmented button[aria-pressed=true] {
   background:white;
-  color:var(--green);
+  color:var(--brand-ink);
   box-shadow:0 1px 4px #0001;
   font-weight:650;
 }
@@ -625,7 +626,7 @@ legend span {
 .tag {
   font-size:9px;
   color:var(--muted);
-  background:#f2f4ed;
+  background:#f7f3e6;
   border-radius:4px;
   padding:5px 7px;
   white-space:nowrap;
@@ -656,8 +657,8 @@ legend span {
   padding:11px 9px;
 }
 .rank-row.selected {
-  border-color:#cadbca;
-  background:#f2f6ee;
+  border-color:#e2bd35;
+  background:#fff8dc;
 }
 .rank-number {
   font-size:11px;
@@ -677,18 +678,18 @@ legend span {
 .rank-score {
   font-size:17px;
   font-weight:600;
-  color:var(--green);
+  color:var(--brand-ink);
   text-align:right;
 }
 .bar-track {
   height:5px;
-  background:#edf0e9;
+  background:#efede6;
   border-radius:10px;
   overflow:hidden;
 }
 .bar-fill {
   height:100%;
-  background:var(--green);
+  background:var(--brand-ink);
   border-radius:10px;
   min-width:0;
 }
@@ -763,7 +764,7 @@ legend span {
   grid-template-columns:22px 1fr auto;
   gap:8px;
   align-items:center;
-  border-bottom:1px solid #edf0e8;
+  border-bottom:1px solid #efede6;
   padding:12px 0;
   font-size:10px;
 }
@@ -772,16 +773,16 @@ legend span {
 }
 .combo-row strong {
   font-size:10px;
-  color:var(--green);
+  color:var(--brand-ink);
 }
 .insight-callout {
   display:flex;
   gap:13px;
-  background:#edf3e8;
+  background:#fff4c8;
   padding:13px;
   border-radius:6px;
   margin-top:17px;
-  color:var(--green);
+  color:var(--brand-ink);
 }
 .insight-callout>span {
   font-size:23px;
@@ -1094,3 +1095,16 @@ legend span {
     padding:5px 12px;
   }
 }
+
+/* Mustang Market: yellow, black, and white. */
+.brand-mark { background:var(--mustang-yellow); color:var(--ink); }
+.vote-button.love { background:var(--mustang-yellow); border-color:#dfb82e; color:var(--ink); }
+.choice[aria-pressed=true] { border-color:#9b7400; box-shadow:0 0 0 1px #9b7400; }
+.color .choice[aria-pressed=true] { border-color:#9b7400; box-shadow:none; }
+.bar-fill { background:var(--mustang-yellow); }
+.bar-fill.negative { background:#555; }
+.dot { background:#c69c14; }
+.voting-page .app-shell { padding-top:24px; }
+.insights-link { font-size:11px; font-weight:650; padding:8px 12px; background:#fff1b5; border-radius:5px; white-space:nowrap; }
+.voting-page .page-footer { justify-content:flex-end; }
+@media(max-width:700px) { .voting-page .app-shell { padding-top:14px; } }

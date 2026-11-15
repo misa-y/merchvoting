@@ -1,16 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mustang Market · Design Lab</title><link rel="stylesheet" href="./styles.css"></head>
-<body>
+<body class="voting-page">
   <main class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="./index.html"><span class="brand-mark">M<span>↗</span></span><span>ASIJ <strong>Mustang Market</strong></span></a>
-      <nav aria-label="Main navigation"><a class="active" href="./index.html" aria-current="page">Design studio</a><a href="./admin.html">Student insights <span aria-hidden="true">↗</span></a></nav>
-      <span class="lab-badge">DESIGN LAB <span>Prototype</span></span>
-    </header>
-    <section class="intro"><div><p class="eyebrow">MADE FOR STUDENTS. SHAPED BY YOU.</p><h1>Your next favorite.<br><span>Your way.</span></h1></div><p>Explore the collection. Make it yours.<br> Tell us what you’d actually wear.</p></section>
     <section class="studio" aria-label="Customize and vote">
-      <div class="collection-bar"><div><span class="step">01</span><label for="productPicker">Choose a design</label></div><select id="productPicker" aria-label="Choose a product"></select><span id="cardPosition" class="muted"></span></div>
+      <div class="collection-bar"><div><span class="step">01</span><label for="productPicker">Choose a design</label></div><select id="productPicker" aria-label="Choose a product"></select><span id="cardPosition" class="muted"></span><a class="insights-link" href="./admin.html">Results ↗</a></div>
       <article class="product-card" id="voteCard">
         <section class="preview-column" aria-label="Product preview">
           <div class="preview-label"><span class="dot"></span> ORIGINAL DESIGN <span id="category"></span></div>
@@ -29,7 +23,7 @@
         </section>
       </article>
     </section>
-    <footer class="page-footer"><p><span class="dot"></span> Your voice, the next collection.</p><p>Prototype votes stay in this browser · Original voting data stays separate</p></footer>
+    <footer class="page-footer"><p>Prototype votes stay in this browser · Original voting data stays separate</p></footer>
     <p id="status" class="status" role="status" aria-live="polite"></p>
   </main>
   <script src="./catalog.js"></script><script src="./store.js"></script><script src="./app.js"></script>
