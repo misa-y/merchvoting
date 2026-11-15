@@ -15,9 +15,14 @@ window.DESIGN_CATALOG = [
 
 // Concept options describe possible future variants, not stock availability.
 window.MERCH_COLORS = {
-  Navy: '#223856', Black: '#25262a', Gray: '#92969b', White: '#f6f3e9',
-  Burgundy: '#823d50', Sage: '#9ba997', Pink: '#e2a6bb', Butter: '#ede59b',
+  Black: '#171717', White: '#ffffff', 'Mustang Gold': '#f5c518',
+  Navy: '#223856', Gray: '#92969b', Cream: '#f3e5ca',
+  Burgundy: '#823d50', Red: '#c93e3e', Charcoal: '#4c4c4c',
+  Chocolate: '#694734', Butter: '#f7e69a', Sage: '#9ba997',
+  Pink: '#e9a6c0', Lavender: '#bca6dc', 'Sky Blue': '#91c6e8',
+  'Royal Blue': '#345ec9',
 };
+const CORE_COLORS = ['Black', 'White', 'Mustang Gold', 'Navy', 'Gray', 'Cream', 'Burgundy', 'Red'];
 window.DESIGN_CATALOG = window.DESIGN_CATALOG.map((design) => {
   const kind = /pants/.test(design.id) ? 'pants'
     : /hoodie/.test(design.id) ? 'hoodie'
@@ -25,10 +30,11 @@ window.DESIGN_CATALOG = window.DESIGN_CATALOG.map((design) => {
     : /fleece|longsleeve/.test(design.id) ? 'longsleeve' : 'shirt';
   return {
     ...design, kind,
-    colors: ['asij_hoodie', 'asij_pants'].includes(design.id) ? ['Navy', 'Black', 'Gray', 'White', 'Butter']
-      : kind === 'pants' ? ['Navy', 'Black', 'Gray', 'Sage']
-      : kind === 'tank' ? ['White', 'Black', 'Pink', 'Navy']
-      : ['Navy', 'Black', 'Gray', 'White', 'Burgundy'],
+    colors: [...CORE_COLORS, ...(kind === 'pants' || /fleece/.test(design.id)
+      ? ['Charcoal', 'Chocolate', 'Butter', 'Sage']
+      : kind === 'tank' || kind === 'hoodie'
+        ? ['Pink', 'Lavender', 'Sky Blue', 'Butter']
+        : ['Royal Blue', 'Sky Blue', 'Pink', 'Butter'])],
     fits: kind === 'pants' ? ['Regular', 'Relaxed', 'Wide leg']
       : kind === 'tank' ? ['Regular', 'Cropped'] : ['Regular', 'Oversized', 'Cropped'],
     sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],

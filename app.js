@@ -26,8 +26,8 @@ function setBusy(value) {
 }
 function renderConcept() {
   const design = catalog[currentIndex];
-  const color = window.MERCH_COLORS[preferences.color] || '#d8dbd3';
-  $('#conceptShape').innerHTML = `<svg viewBox="0 0 100 100" width="54" height="58"><path d="${silhouettes[design.kind]}" fill="${color}" stroke="#777b73" stroke-width="1.5"/></svg>`;
+  const color = window.MERCH_COLORS[preferences.color] || '#e3e3e3';
+  $('#conceptShape').innerHTML = `<svg viewBox="0 0 100 100" width="54" height="58"><path d="${silhouettes[design.kind]}" fill="${color}" stroke="#777777" stroke-width="1.5"/></svg>`;
   $('#conceptTitle').textContent = preferences.color ? `${preferences.color} · color concept` : 'Concept color preview';
   $('#conceptText').textContent = preferences.color ? 'A color direction for a future design.' : 'Choose a swatch to explore a color.';
 }

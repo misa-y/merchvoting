@@ -1,12 +1,12 @@
 :root {
   color-scheme:light;
-  --bg:#faf9f5;
+  --bg:#fffdf7;
   --surface:#fff;
   --ink:#171717;
   --muted:#66635c;
   --line:#e3dfd2;
   --brand-ink:#171717;
-  --mustang-yellow:#f4cf46;
+  --mustang-yellow:#f5c518;
   --reject:#333333;
   --like:#6b5200;
   --love:#6b5200;
@@ -229,7 +229,7 @@ nav a.active {
 }
 .preview-column {
   min-width:0;
-  background:#f5f4ef;
+  background:#ffffff;
   padding:18px 28px 12px;
   overflow:hidden;
 }
@@ -1108,3 +1108,16 @@ legend span {
 .insights-link { font-size:11px; font-weight:650; padding:8px 12px; background:#fff1b5; border-radius:5px; white-space:nowrap; }
 .voting-page .page-footer { justify-content:flex-end; }
 @media(max-width:700px) { .voting-page .app-shell { padding-top:14px; } }
+
+/* Clean white product stage with explicit Mustang black-and-gold accents. */
+.voting-page .studio { border-top:4px solid var(--mustang-yellow); }
+.preview-column { border-right:1px solid #f0e4bd; }
+.preview-label { background:#171717; color:#ffffff; padding:9px 11px; border-radius:4px; }
+.preview-label .dot { background:var(--mustang-yellow); }
+.preview-label>span:last-child { color:var(--mustang-yellow); }
+.deck-wrap { background:#ffffff; }
+.choices.color { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; }
+.color .choice { min-width:0; padding:5px 2px; gap:5px; font-size:9px; }
+.swatch { width:28px; height:28px; }
+.color .choice[aria-pressed=true] { background:#fff0a8; border-color:#171717; }
+@media(max-width:700px) { .preview-column { border-right:0; border-bottom:1px solid #f0e4bd; } }
