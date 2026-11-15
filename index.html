@@ -1,45 +1,36 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Merch Mockup Voting</title>
-    <link rel="stylesheet" href="./styles.css">
-  </head>
-  <body>
-    <main class="app-shell">
-      <section class="workspace" aria-label="Merch voting workspace">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">ASIJ Mustang Market</p>
-            <h1>New Designs</h1>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mustang Market · Design Lab</title><link rel="stylesheet" href="./styles.css"></head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./index.html"><span class="brand-mark">M<span>↗</span></span><span>ASIJ <strong>Mustang Market</strong></span></a>
+      <nav aria-label="Main navigation"><a class="active" href="./index.html" aria-current="page">Design studio</a><a href="./admin.html">Student insights <span aria-hidden="true">↗</span></a></nav>
+      <span class="lab-badge">DESIGN LAB <span>Prototype</span></span>
+    </header>
+    <section class="intro"><div><p class="eyebrow">MADE FOR STUDENTS. SHAPED BY YOU.</p><h1>Your next favorite.<br><span>Your way.</span></h1></div><p>Explore the collection. Make it yours.<br> Tell us what you’d actually wear.</p></section>
+    <section class="studio" aria-label="Customize and vote">
+      <div class="collection-bar"><div><span class="step">01</span><label for="productPicker">Choose a design</label></div><select id="productPicker" aria-label="Choose a product"></select><span id="cardPosition" class="muted"></span></div>
+      <article class="product-card" id="voteCard">
+        <section class="preview-column" aria-label="Product preview">
+          <div class="preview-label"><span class="dot"></span> ORIGINAL DESIGN <span id="category"></span></div>
+          <div class="deck-wrap" id="swipeSurface" tabindex="0" aria-label="Swipe left to reject, right to like, or up to love. Arrow keys also work here.">
+            <img id="mockupImage" alt="" draggable="false"><div id="voteBadge" class="vote-badge" aria-hidden="true"></div>
           </div>
-        </header>
-
-        <div class="kiosk-grid">
-          <section class="voting-area" aria-label="Swipe voting">
-            <div class="deck-wrap">
-              <div id="emptyState" class="empty-state">
-                <div class="empty-mark">!</div>
-                <h2>No designs configured</h2>
-                <p>Add designs to catalog.js, then refresh this screen.</p>
-              </div>
-
-              <article id="voteCard" class="vote-card hidden" aria-live="polite">
-                <div id="voteBadge" class="vote-badge"></div>
-                <img id="mockupImage" alt="" draggable="false">
-                <div class="card-footer">
-                  <h2 id="designName"></h2>
-                  <p id="cardPosition"></p>
-                </div>
-              </article>
-            </div>
-          </section>
-        </div>
-      </section>
-    </main>
-
-    <script src="./catalog.js"></script>
-    <script src="./app.js"></script>
-  </body>
-</html>
+          <div class="gesture-hint"><span>← Reject</span><span>↑ Love</span><span>Like →</span></div>
+          <p class="image-caption">Original merchandise artwork · unchanged</p>
+        </section>
+        <section class="customization" aria-labelledby="designName">
+          <p class="eyebrow"><span class="step">02</span> MAKE IT YOURS</p>
+          <h2 id="designName"></h2><p class="subcopy">What would make this your go-to?</p>
+          <div id="preferences"></div>
+          <div class="concept"><div id="conceptShape" aria-hidden="true"></div><div><strong id="conceptTitle">Concept color preview</strong><p id="conceptText">Choose a swatch to explore a color.</p><small>Generic silhouette, not a product rendering.</small></div></div>
+          <div class="vote-section"><p class="eyebrow"><span class="step">03</span> CAST YOUR VOTE</p><div class="vote-actions"><button type="button" data-vote="reject" class="vote-button reject"><span>←</span> Reject</button><button type="button" data-vote="like" class="vote-button like"><span>→</span> Like</button><button type="button" data-vote="love" class="vote-button love"><span>↑</span> Love</button></div><p class="vote-note">Swipe the image or use the buttons. Preferences are optional; unselected options stay unspecified.</p></div>
+        </section>
+      </article>
+    </section>
+    <footer class="page-footer"><p><span class="dot"></span> Your voice, the next collection.</p><p>Prototype votes stay in this browser · Original voting data stays separate</p></footer>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </main>
+  <script src="./catalog.js"></script><script src="./store.js"></script><script src="./app.js"></script>
+</body></html>

@@ -1,39 +1,16 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Merch Voting Results</title>
-    <link rel="stylesheet" href="./styles.css">
-  </head>
-  <body>
-    <main class="app-shell admin-shell">
-      <section class="workspace" aria-label="Merch voting results">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">ASIJ Mustang Market</p>
-            <h1>Results</h1>
-          </div>
-          <button id="exportResults" class="small-button" type="button">Export JSON</button>
-        </header>
-
-        <section class="admin-grid">
-          <div class="scoreboard">
-            <div>
-              <span id="totalVotes">0</span>
-              <p>Total votes</p>
-            </div>
-            <div>
-              <span id="roundCount">0</span>
-              <p>Rounds</p>
-            </div>
-          </div>
-          <div id="resultsList" class="results-list"></div>
-        </section>
-      </section>
-    </main>
-
-    <script src="./catalog.js"></script>
-    <script src="./admin.js"></script>
-  </body>
-</html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Student Insights · Mustang Market</title><link rel="stylesheet" href="./styles.css"></head>
+<body><main class="app-shell dashboard-shell">
+  <header class="topbar"><a class="brand" href="./index.html"><span class="brand-mark">M<span>↗</span></span><span>ASIJ <strong>Mustang Market</strong></span></a><nav aria-label="Main navigation"><a href="./index.html">Design studio</a><a class="active" href="./admin.html" aria-current="page">Student insights ↗</a></nav><span class="lab-badge">DESIGN LAB <span>Prototype</span></span></header>
+  <section class="intro dashboard-intro"><div><p class="eyebrow">FROM A VOTE TO A DESIGN DIRECTION</p><h1>Listen. Learn. <span>Make.</span></h1></div><p>Which designs resonate?<br> And what would students change?</p></section>
+  <div class="dataset-bar"><div class="segmented" role="group" aria-label="Results dataset"><button id="realData" aria-pressed="true">Prototype results</button><button id="demoData" aria-pressed="false">Demonstration data</button></div><span id="datasetLabel">LOCAL BROWSER DATA</span><button id="exportResults" class="small-button">Export JSON ↓</button></div>
+  <div id="demoBanner" class="demo-banner" hidden>DEMONSTRATION DATA · Simulated votes for presenting this prototype. These are not student responses.</div>
+  <section class="metrics" aria-label="Summary"><div><span class="eyebrow">TOTAL VOTES</span><strong id="totalVotes">0</strong><p>Decisions, not unique students</p></div><div><span class="eyebrow">POSITIVE RESPONSE</span><strong id="positiveRate">—</strong><p>Likes + loves / all votes</p></div><div><span class="eyebrow">PREFERENCE COVERAGE</span><strong id="coverage">—</strong><p id="coverageNote">Positive votes with any preference</p></div><div><span class="eyebrow">LEADING DESIGN</span><strong id="leadingDesign" class="leader-name">No votes yet</strong><p id="leaderScore">Start in the design studio</p></div></section>
+  <div class="insights-grid">
+    <section class="panel rankings"><div class="section-heading"><div><p class="eyebrow">01 / THE BIG PICTURE</p><h2>What students like</h2></div><span class="tag">Weighted score</span></div><p class="panel-note">Like +1 · Love +3 · Reject −1. Select a design to explore its preferences.</p><div id="resultsList" class="results-list"></div></section>
+    <section class="panel preference-panel"><div class="section-heading"><div><p class="eyebrow">02 / THE DETAILS THAT MATTER</p><h2 id="selectedName">Design preferences</h2></div></div><p id="productSummary" class="panel-note"></p><div class="chart-pair"><div><h3>Color direction</h3><div id="colorChart" class="bar-chart"></div></div><div><h3>The right fit</h3><div id="fitChart" class="bar-chart"></div></div></div><div class="size-section"><h3>Size preferences</h3><div id="sizeChart" class="size-chart"></div></div><div class="combination-section"><div class="section-heading"><h3>Popular combinations</h3><span class="tag">Like + love votes</span></div><div id="combinations"></div></div><div class="insight-callout"><span aria-hidden="true">↗</span><p id="insightText"></p></div><p class="chart-footnote">Preference charts count each like or love once. Rejects still affect rankings and remain in the export. Unspecified attributes are excluded; percentages use selections for that attribute.</p></section>
+  </div>
+  <details class="data-tools"><summary>Prototype data tools <span>Import original records · Reset · About this data</span></summary><div class="tools-body"><div><h3>Keep your original safe</h3><p>Copy original records from this browser and site address once. They keep their original counts and history, with no assumed preferences. Reset clears only new prototype and demonstration votes; this copy and production data stay intact.</p><p id="importStatus"></p><p id="roundStatus"></p></div><div class="tools-actions"><button id="importOriginal" class="small-button">Copy original records</button><button id="resetPrototype" class="small-button danger">Reset prototype votes</button></div></div></details>
+  <footer class="page-footer"><p><span class="dot"></span> Better merchandise starts with listening.</p><p>Browser-local prototype · No student identity collected</p></footer><p id="status" class="status" role="status" aria-live="polite"></p>
+</main><script src="./catalog.js"></script><script src="./store.js"></script><script src="./admin.js"></script></body></html>

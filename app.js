@@ -1,395 +1,176 @@
-const STORAGE_KEY = "merch-mockup-voter:v1";
-const DB_NAME = "merch-mockup-voter";
-const DB_STORE = "state";
-const DB_VERSION = 1;
-const DEFAULT_DESIGN_CATALOG = [
-  { id: "charcoal_foldover_pants", name: "Charcoal Foldover Pants", image: "./charcoal_foldover_pants.png" },
-  { id: "polkadot_white_tank", name: "Polkadot White Tank", image: "./polkadot_white_tank.png" },
-  { id: "sequin_tank", name: "Sequin Tank", image: "./sequin_tank.png" },
-  { id: "mustangbobiscalling_shirt", name: "Mustang Bob Is Calling Shirt", image: "./mustangbobiscalling_shirt.png" },
-  { id: "asij_patchwork_tank", name: "ASIJ Patchwork Tank", image: "./asij_patchwork_tank.png" },
-  { id: "asij_hoodie", name: "ASIJ Hoodie Set", image: "./asij_hoodie.png" },
-  { id: "asij_pants", name: "ASIJ Pants Set", image: "./asij_pants.png" },
-  { id: "pov_shirt", name: "POV Shirt", image: "./pov_shirt.png" },
-  { id: "AP_exam_survivor_shirt", name: "AP Exam Survivor Shirt", image: "./AP_exam_survivor_shirt.png" },
-  { id: "athleisure_longsleeve", name: "Athleisure Longsleeve", image: "./athleisure_longsleeve.png" },
-  { id: "asij_fleece", name: "ASIJ Fleece", image: "./asij_fleece.png" },
-  { id: "asij_sweatpants", name: "ASIJ Sweatpants", image: "./asij_sweatpants.png" },
-];
-let DESIGN_CATALOG = [];
-
-let designs = [];
-let currentIndex = 0;
-let round = 0;
-let dragStart = null;
-let db = null;
-
-const els = {
-  voteCard: document.querySelector("#voteCard"),
-  voteBadge: document.querySelector("#voteBadge"),
-  mockupImage: document.querySelector("#mockupImage"),
-  designName: document.querySelector("#designName"),
-  cardPosition: document.querySelector("#cardPosition"),
-  emptyState: document.querySelector("#emptyState"),
-  deckWrap: document.querySelector(".deck-wrap"),
+'use strict';
+const catalog = window.DESIGN_CATALOG;
+const $ = selector => document.querySelector(selector);
+let statusTimer;
+let state, currentIndex = 0, busy = true, dragStart = null;
+let preferences = { color: null, fit: null, size: null };
+const surface = $('#swipeSurface');
+const picker = $('#productPicker');
+const silhouettes = {
+  pants: 'M24 8H76L85 94H57L50 42L43 94H15Z',
+  hoodie: 'M35 24Q27 2 50 3Q73 2 65 24L80 31L96 68L79 76L69 54V94H31V54L21 76L4 68L20 31Z',
+  tank: 'M29 7H40Q50 28 60 7H71L77 94H23Z',
+  longsleeve: 'M33 13Q50 29 67 13L81 24L96 83L78 88L67 51V94H33V51L22 88L4 83L19 24Z',
+  shirt: 'M33 13Q50 29 67 13L95 31L82 55L68 48V94H32V48L18 55L5 31Z',
 };
-
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(DB_STORE);
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+function announce(message, error = false) {
+  clearTimeout(statusTimer);
+  $('#status').textContent = message;
+  if (!error) statusTimer = setTimeout(() => { $('#status').textContent = ''; }, 6000);
+  $('#status').classList.toggle('error', error);
 }
-
-function dbGet(key) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(DB_STORE, "readonly");
-    const request = tx.objectStore(DB_STORE).get(key);
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+function setBusy(value) {
+  busy = value;
+  document.querySelectorAll('button, select').forEach(el => { el.disabled = value; });
+  surface.setAttribute('aria-busy', String(value));
 }
-
-function dbSet(key, value) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(DB_STORE, "readwrite");
-    tx.objectStore(DB_STORE).put(value, key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+function renderConcept() {
+  const design = catalog[currentIndex];
+  const color = window.MERCH_COLORS[preferences.color] || '#d8dbd3';
+  $('#conceptShape').innerHTML = `<svg viewBox="0 0 100 100" width="54" height="58"><path d="${silhouettes[design.kind]}" fill="${color}" stroke="#777b73" stroke-width="1.5"/></svg>`;
+  $('#conceptTitle').textContent = preferences.color ? `${preferences.color} · color concept` : 'Concept color preview';
+  $('#conceptText').textContent = preferences.color ? 'A color direction for a future design.' : 'Choose a swatch to explore a color.';
 }
-
-function loadCatalog() {
-  return new Promise((resolve) => {
-    const useCatalog = () => {
-      DESIGN_CATALOG = Array.isArray(window.DESIGN_CATALOG) && window.DESIGN_CATALOG.length
-        ? window.DESIGN_CATALOG
-        : DEFAULT_DESIGN_CATALOG;
-    };
-
-    const script = document.createElement("script");
-    script.src = `./catalog.js?v=${Date.now()}`;
-    script.onload = () => {
-      useCatalog();
-      resolve();
-    };
-    script.onerror = () => {
-      useCatalog();
-      console.error("Could not load catalog.js");
-      resolve();
-    };
-    document.head.append(script);
-  });
-}
-
-async function loadState() {
-  db = await openDatabase();
-  let saved = await dbGet(STORAGE_KEY);
-
-  if (!saved) {
-    const legacyState = localStorage.getItem(STORAGE_KEY);
-    saved = legacyState ? JSON.parse(legacyState) : null;
-    if (saved) await dbSet(STORAGE_KEY, saved);
+function renderOptions() {
+  const design = catalog[currentIndex];
+  const container = $('#preferences');
+  container.replaceChildren();
+  for (const [key, values] of [['color', design.colors], ['fit', design.fits], ['size', design.sizes]]) {
+    const field = document.createElement('fieldset');
+    const legend = document.createElement('legend');
+    legend.textContent = `${key[0].toUpperCase() + key.slice(1)} `;
+    const selected = document.createElement('span');
+    selected.textContent = preferences[key] || 'Not selected';
+    legend.append(selected);
+    const choices = document.createElement('div');
+    choices.className = `choices ${key}`;
+    for (const value of values) {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'choice';
+      button.setAttribute('aria-pressed', String(preferences[key] === value));
+      button.setAttribute('aria-label', `${key}: ${value}`);
+      if (key === 'color') {
+        const swatch = document.createElement('span'); swatch.className = 'swatch';
+        swatch.style.backgroundColor = window.MERCH_COLORS[value]; button.append(swatch);
+      }
+      button.append(document.createTextNode(value));
+      button.addEventListener('click', () => {
+        if (busy) return;
+        preferences[key] = preferences[key] === value ? null : value;
+        // Update in place to preserve keyboard focus while choosing options.
+        legend.lastChild.textContent = preferences[key] || 'Not selected';
+        [...choices.children].forEach((el, i) => el.setAttribute('aria-pressed', String(values[i] === preferences[key])));
+        renderConcept();
+      });
+      choices.append(button);
+    }
+    field.append(legend, choices); container.append(field);
   }
-
-  if (!saved) {
-    designs = hydrateDesigns(null);
-    return;
-  }
-
-  try {
-    designs = hydrateDesigns(saved);
-    currentIndex = Number.isInteger(saved.currentIndex) ? saved.currentIndex : 0;
-    round = Number.isInteger(saved.round) ? saved.round : 0;
-  } catch {
-    designs = hydrateDesigns(null);
-    currentIndex = 0;
-    round = 0;
-  }
+  renderConcept();
 }
-
-function hydrateDesigns(saved) {
-  const savedById = new Map((saved?.designs || []).map((design) => [design.id, design]));
-
-  return DESIGN_CATALOG.map((catalogDesign) => {
-    const previous = savedById.get(catalogDesign.id);
-    return {
-      id: catalogDesign.id,
-      name: catalogDesign.name,
-      image: catalogDesign.image,
-      votes: previous?.votes || {
-        reject: 0,
-        like: 0,
-        love: 0,
-      },
-      history: previous?.history || [],
-    };
-  });
-}
-
-async function saveState() {
-  if (!db) return;
-
-  try {
-    await dbSet(STORAGE_KEY, {
-      designs,
-      currentIndex,
-      round,
-    });
-  } catch (error) {
-    console.error("Could not save voting state", error);
-  }
-}
-
-function activeDesign() {
-  if (!designs.length) return null;
-  currentIndex = ((currentIndex % designs.length) + designs.length) % designs.length;
-  return designs[currentIndex];
-}
-
-function totalVotesFor(design) {
-  return design.votes.reject + design.votes.like + design.votes.love;
-}
-
-function totalVotes() {
-  return designs.reduce((sum, design) => sum + totalVotesFor(design), 0);
-}
-
-function scoreFor(design) {
-  return design.votes.like + design.votes.love * 3 - design.votes.reject;
-}
-
-async function vote(type) {
-  const design = activeDesign();
-  if (!design) return;
-
-  design.votes[type] += 1;
-  design.history.push({
-    type,
-    at: new Date().toISOString(),
-    round: round + 1,
-  });
-
-  currentIndex += 1;
-  if (currentIndex >= designs.length) {
-    currentIndex = 0;
-    round += 1;
-  }
-
-  await saveState();
-  animateVote(type);
-}
-
-function animateVote(type) {
-  const transforms = {
-    reject: "translate3d(-120vw, 40px, 0) rotate(-18deg)",
-    like: "translate3d(120vw, 40px, 0) rotate(18deg)",
-    love: "translate3d(0, -120vh, 0) rotate(0deg)",
-  };
-
-  flashVote(type);
-  els.voteBadge.textContent = type;
-  els.voteBadge.className = `vote-badge show ${type}`;
-  els.voteCard.style.transform = transforms[type];
-  els.voteCard.style.opacity = "0";
-
-  window.setTimeout(() => {
-    els.voteCard.style.transition = "none";
-    els.voteCard.style.transform = "translate3d(0, 0, 0) rotate(0deg)";
-    els.voteCard.style.opacity = "1";
-    els.voteBadge.className = "vote-badge";
-    render();
-    requestAnimationFrame(() => {
-      els.voteCard.style.transition = "";
-    });
-  }, 190);
-}
-
-function flashVote(type) {
-  els.deckWrap.classList.remove("flash", "flash-reject", "flash-like", "flash-love");
-  void els.deckWrap.offsetWidth;
-  els.deckWrap.classList.add("flash", `flash-${type}`);
-
-  window.setTimeout(() => {
-    els.deckWrap.classList.remove("flash", `flash-${type}`);
-  }, 520);
-}
-
-function renderCard() {
-  const design = activeDesign();
-  const hasDesigns = Boolean(design);
-
-  els.emptyState.classList.toggle("hidden", hasDesigns);
-  els.voteCard.classList.toggle("hidden", !hasDesigns);
-
-  if (!design) return;
-
-  els.mockupImage.src = design.image;
-  els.mockupImage.alt = design.name;
-  els.designName.textContent = design.name;
-  els.cardPosition.textContent = `${currentIndex + 1} / ${designs.length}`;
-}
-
-function renderLists() {
-}
-
 function render() {
-  renderCard();
-  renderLists();
+  const design = catalog[currentIndex];
+  picker.value = design.id;
+  $('#designName').textContent = design.name;
+  $('#mockupImage').src = design.image;
+  $('#mockupImage').alt = `${design.name}, original artwork`;
+  $('#category').textContent = design.kind === 'pants' ? 'BOTTOMS' : 'TOPS';
+  $('#cardPosition').textContent = `${String(currentIndex + 1).padStart(2, '0')} / ${catalog.length} designs`;
+  preferences = { color: null, fit: null, size: null };
+  renderOptions();
 }
-
-function updateDragBadge(deltaX, deltaY) {
-  const type = getSwipeIntent(deltaX, deltaY, 70);
-
-  if (!type) {
-    els.voteBadge.className = "vote-badge";
-    els.voteBadge.textContent = "";
-    return;
-  }
-
-  els.voteBadge.textContent = type;
-  els.voteBadge.className = `vote-badge show ${type}`;
+async function vote(type) {
+  if (busy || !['reject', 'like', 'love'].includes(type)) return;
+  setBusy(true);
+  const design = catalog[currentIndex];
+  const nextIndex = (currentIndex + 1) % catalog.length;
+  const selected = { ...preferences };
+  try {
+    state = await MerchStore.update(s => {
+      s.votes.push({ id: crypto.randomUUID(), productId: design.id, type, preferences: selected,
+        at: new Date().toISOString(), round: s.round + 1, source: 'prototype' });
+      s.currentIndex = nextIndex;
+      if (nextIndex === 0) s.round += 1;
+    });
+    $('#voteBadge').textContent = type;
+    $('#voteBadge').className = `vote-badge show ${type}`;
+    surface.classList.add(`voted-${type}`);
+    await new Promise(resolve => setTimeout(resolve, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 240));
+    currentIndex = nextIndex;
+    surface.style.transform = '';
+    surface.classList.remove('voted-reject', 'voted-like', 'voted-love');
+    $('#voteBadge').className = 'vote-badge';
+    render();
+    announce(`${type[0].toUpperCase() + type.slice(1)} saved for ${design.name}${Object.values(selected).some(Boolean) ? ` · ${Object.values(selected).filter(Boolean).join(' / ')}` : ' · no preferences selected'}.`);
+  } catch (error) {
+    surface.style.transform = '';
+    $('#voteBadge').className = 'vote-badge';
+    announce(`Vote was not saved. ${error.message}`, true);
+  } finally { setBusy(false); }
 }
-
-function getSwipeIntent(deltaX, deltaY, threshold) {
-  const absX = Math.abs(deltaX);
-  const absY = Math.abs(deltaY);
-
-  if (deltaY < -threshold && absY > absX * 0.85) return "love";
-  if (deltaX > threshold && absX > absY * 0.75) return "like";
-  if (deltaX < -threshold && absX > absY * 0.75) return "reject";
-  return "";
+// Preserve the original direction and distance rules, including curved swipes.
+function getSwipeIntent(dx, dy, threshold) {
+  const x = Math.abs(dx), y = Math.abs(dy);
+  if (dy < -threshold && y > x * 0.85) return 'love';
+  if (dx > threshold && x > y * 0.75) return 'like';
+  if (dx < -threshold && x > y * 0.75) return 'reject';
+  return '';
 }
-
 function getSwipeResult() {
-  if (!dragStart) return "";
-
-  const last = dragStart.points.at(-1) || dragStart;
-  const deltaX = last.x - dragStart.x;
-  const deltaY = last.y - dragStart.y;
-  const directIntent = getSwipeIntent(deltaX, deltaY, 110);
-
-  if (directIntent) return directIntent;
-
-  const farthest = dragStart.points.reduce(
-    (max, point) => {
-      const moveX = point.x - dragStart.x;
-      const moveY = point.y - dragStart.y;
-      return {
-        right: Math.max(max.right, moveX),
-        left: Math.min(max.left, moveX),
-        up: Math.min(max.up, moveY),
-      };
-    },
-    { right: 0, left: 0, up: 0 },
-  );
-
-  const horizontalReach = Math.max(farthest.right, Math.abs(farthest.left));
-  const verticalReach = Math.abs(farthest.up);
-
-  if (verticalReach > 145 && verticalReach > horizontalReach * 0.9) return "love";
-  if (farthest.right > 145 && farthest.right > Math.abs(farthest.left) * 1.25) return "like";
-  if (Math.abs(farthest.left) > 145 && Math.abs(farthest.left) > farthest.right * 1.25) return "reject";
-
-  return "";
+  const last = dragStart.points.at(-1);
+  const direct = getSwipeIntent(last.x - dragStart.x, last.y - dragStart.y, 110);
+  if (direct) return direct;
+  const farthest = dragStart.points.reduce((max, point) => ({
+    right: Math.max(max.right, point.x - dragStart.x), left: Math.min(max.left, point.x - dragStart.x),
+    up: Math.min(max.up, point.y - dragStart.y),
+  }), { right: 0, left: 0, up: 0 });
+  const horizontal = Math.max(farthest.right, Math.abs(farthest.left));
+  if (Math.abs(farthest.up) > 145 && Math.abs(farthest.up) > horizontal * 0.9) return 'love';
+  if (farthest.right > 145 && farthest.right > Math.abs(farthest.left) * 1.25) return 'like';
+  if (Math.abs(farthest.left) > 145 && Math.abs(farthest.left) > farthest.right * 1.25) return 'reject';
+  return '';
 }
-
-function onPointerDown(event) {
-  if (!activeDesign() || event.target === els.designName) return;
-  event.preventDefault();
-
-  dragStart = {
-    pointerId: event.pointerId,
-    x: event.clientX,
-    y: event.clientY,
-    points: [{ x: event.clientX, y: event.clientY }],
-  };
-  els.voteCard.setPointerCapture(event.pointerId);
-  els.voteCard.classList.add("dragging");
-}
-
-function onPointerMove(event) {
+surface.addEventListener('pointerdown', event => {
+  if (busy || dragStart || !event.isPrimary || event.button !== 0) return;
+  event.preventDefault(); surface.focus(); surface.setPointerCapture(event.pointerId);
+  dragStart = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, points: [{ x: event.clientX, y: event.clientY }] };
+  surface.classList.add('dragging');
+});
+surface.addEventListener('pointermove', event => {
   if (!dragStart || event.pointerId !== dragStart.pointerId) return;
-  event.preventDefault();
-
-  const deltaX = event.clientX - dragStart.x;
-  const deltaY = event.clientY - dragStart.y;
-  const rotation = deltaX / 18;
+  const dx = event.clientX - dragStart.x, dy = event.clientY - dragStart.y;
   dragStart.points.push({ x: event.clientX, y: event.clientY });
-  els.voteCard.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) rotate(${rotation}deg)`;
-  updateDragBadge(deltaX, deltaY);
-}
-
-function onPointerUp(event) {
+  surface.style.transform = `translate(${dx * 0.2}px, ${dy * 0.2}px) rotate(${dx / 50}deg)`;
+  const intent = getSwipeIntent(dx, dy, 70);
+  $('#voteBadge').textContent = intent;
+  $('#voteBadge').className = `vote-badge ${intent ? `show ${intent}` : ''}`;
+});
+surface.addEventListener('pointerup', event => {
   if (!dragStart || event.pointerId !== dragStart.pointerId) return;
-
-  event.preventDefault();
   dragStart.points.push({ x: event.clientX, y: event.clientY });
   const result = getSwipeResult();
-  dragStart = null;
-  els.voteCard.classList.remove("dragging");
-
-  if (result) {
-    vote(result);
-    return;
-  }
-
-  els.voteCard.style.transform = "translate3d(0, 0, 0) rotate(0deg)";
-  els.voteBadge.className = "vote-badge";
-}
-
-async function resetVotesForAdmin() {
-  designs = designs.map((design) => ({
-    ...design,
-    votes: {
-      reject: 0,
-      like: 0,
-      love: 0,
-    },
-    history: [],
-  }));
-  currentIndex = 0;
-  round = 0;
-  await saveState();
-  render();
-}
-
-els.voteCard.addEventListener("pointerdown", onPointerDown);
-els.voteCard.addEventListener("pointermove", onPointerMove);
-els.voteCard.addEventListener("pointerup", onPointerUp);
-els.voteCard.addEventListener("pointercancel", onPointerUp);
-
-window.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowLeft") vote("reject");
-  if (event.key === "ArrowRight") vote("like");
-  if (event.key === "ArrowUp") vote("love");
+  dragStart = null; surface.classList.remove('dragging');
+  surface.style.transform = '';
+  if (result) vote(result); else $('#voteBadge').className = 'vote-badge';
 });
-
+surface.addEventListener('pointercancel', () => { dragStart = null; surface.style.transform = ''; surface.classList.remove('dragging'); $('#voteBadge').className = 'vote-badge'; });
+window.addEventListener('keydown', event => {
+  if (dragStart || event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.target.closest('button, select, input, textarea, a')) return;
+  const type = { ArrowLeft: 'reject', ArrowRight: 'like', ArrowUp: 'love' }[event.key];
+  if (type) { event.preventDefault(); vote(type); }
+});
+picker.addEventListener('change', () => {
+  currentIndex = catalog.findIndex(d => d.id === picker.value); render();
+});
+document.querySelectorAll('[data-vote]').forEach(button => button.addEventListener('click', () => vote(button.dataset.vote)));
+catalog.forEach(design => { const option = document.createElement('option'); option.value = design.id; option.textContent = design.name; picker.append(option); });
 window.merchVotingAdmin = {
-  resetVotes: resetVotesForAdmin,
-  results: () => ({
-    round,
-    totalVotes: totalVotes(),
-    designs: designs.map(({ id, name, votes, history }) => ({
-      id,
-      name,
-      votes: { ...votes },
-      score: scoreFor({ votes }),
-      history: [...history],
-    })),
-  }),
+  results: async () => MerchStore.summarize(await MerchStore.read(), catalog),
+  resetVotes: async () => {
+    if (!confirm('Reset prototype votes? Copied original records and production data will be kept.')) return;
+    await MerchStore.reset(); currentIndex = 0; render(); announce('Prototype votes reset. Original records preserved.');
+  },
 };
-
-loadCatalog()
-  .then(loadState)
-  .catch((error) => {
-    console.error("Could not load voting state", error);
-    designs = hydrateDesigns(null);
-  })
-  .finally(render);
+MerchStore.read().then(saved => {
+  state = saved; currentIndex = Math.max(0, saved.currentIndex % catalog.length); render(); setBusy(false);
+}).catch(error => { render(); setBusy(true); announce(`Storage unavailable. Voting is disabled to avoid losing your votes. ${error.message}`, true); });

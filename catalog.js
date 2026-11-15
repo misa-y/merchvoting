@@ -12,3 +12,25 @@ window.DESIGN_CATALOG = [
   { id: "asij_fleece", name: "ASIJ Fleece", image: "./asij_fleece.png" },
   { id: "asij_sweatpants", name: "ASIJ Sweatpants", image: "./asij_sweatpants.png" },
 ];
+
+// Concept options describe possible future variants, not stock availability.
+window.MERCH_COLORS = {
+  Navy: '#223856', Black: '#25262a', Gray: '#92969b', White: '#f6f3e9',
+  Burgundy: '#823d50', Sage: '#9ba997', Pink: '#e2a6bb', Butter: '#ede59b',
+};
+window.DESIGN_CATALOG = window.DESIGN_CATALOG.map((design) => {
+  const kind = /pants/.test(design.id) ? 'pants'
+    : /hoodie/.test(design.id) ? 'hoodie'
+    : /tank/.test(design.id) ? 'tank'
+    : /fleece|longsleeve/.test(design.id) ? 'longsleeve' : 'shirt';
+  return {
+    ...design, kind,
+    colors: ['asij_hoodie', 'asij_pants'].includes(design.id) ? ['Navy', 'Black', 'Gray', 'White', 'Butter']
+      : kind === 'pants' ? ['Navy', 'Black', 'Gray', 'Sage']
+      : kind === 'tank' ? ['White', 'Black', 'Pink', 'Navy']
+      : ['Navy', 'Black', 'Gray', 'White', 'Burgundy'],
+    fits: kind === 'pants' ? ['Regular', 'Relaxed', 'Wide leg']
+      : kind === 'tank' ? ['Regular', 'Cropped'] : ['Regular', 'Oversized', 'Cropped'],
+    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+  };
+});
