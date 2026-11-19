@@ -3,11 +3,12 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const { IDBFactory } = require('fake-indexeddb');
-function setup() {
+function setup(publicDemo = false) {
   const indexedDB = new IDBFactory();
   const local = new Map();
   const context = vm.createContext({ indexedDB, localStorage: { getItem: k => local.get(k) ?? null }, structuredClone, console });
   context.window = context;
+  context.MERCH_PUBLIC_DEMO = publicDemo;
   vm.runInContext(fs.readFileSync('catalog.js', 'utf8'), context);
   vm.runInContext(fs.readFileSync('store.js', 'utf8'), context);
   return { store: context.MerchStore, catalog: context.DESIGN_CATALOG, indexedDB, local };
@@ -83,4 +84,29 @@ test('original products outside the active catalog remain in results', async () 
   const { store, catalog } = setup();
   const state = await store.update(s => { s.originalSnapshot = {data:{designs:[{id:'retired',name:'Retired design',votes:{reject:1,like:3,love:1},history:[]}]}}; });
   const retired = store.summarize(state,catalog).find(p => p.id === 'retired'); assert.equal(retired.total,5); assert.equal(retired.score,5);
+});
+
+
+test('public preview seeds 30 simulated participants, blocks original import, and preserves local prototype data', async () => {
+  const { store, catalog, indexedDB, local } = setup(true);
+  const db = await putOriginal(indexedDB, snapshot);
+  const originalJSON = JSON.stringify(snapshot);
+  local.set('merch-mockup-voter:v1', originalJSON);
+  const state = await store.read();
+  assert.equal(store.DB_NAME, 'mustang-market-public-demo-v1');
+  assert.equal(state.demoVotes.length, 360);
+  assert.equal(new Set(state.demoVotes.map(v => v.participantId)).size, 30);
+  assert.equal(state.votes.length, 0);
+  assert.equal(state.originalSnapshot, null);
+  for (const product of catalog) assert.equal(state.demoVotes.filter(v => v.productId === product.id).length, 30);
+  await assert.rejects(store.importOriginal(), /cannot be imported/);
+  await store.update(s => s.demoVotes.push({id:'rehearsal',productId:'asij_hoodie',type:'love',preferences:{color:'Navy',fit:'Oversized',size:'M'},source:'demonstration-interaction'}));
+  assert.equal(store.summarize(await store.read(), catalog).reduce((n,p) => n+p.total,0), 361);
+  const reset = await store.reset();
+  assert.equal(reset.demoVotes.length,360);
+  assert.equal(reset.votes.length,0);
+  assert.deepEqual(await getOriginal(db),snapshot);
+  assert.equal(local.get('merch-mockup-voter:v1'),originalJSON);
+  assert.equal((await indexedDB.databases()).some(d => d.name === 'mustang-market-utokyo-design-lab-v1'),false);
+  db.close();
 });

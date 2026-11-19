@@ -3,6 +3,7 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mustang Market · Design Lab</title><link rel="stylesheet" href="./styles.css"></head>
 <body class="voting-page">
   <main class="app-shell">
+    <p class="public-preview-note" data-public-preview hidden>PUBLIC DEMO · Simulated data only. Votes here are rehearsal inputs, not student research.</p>
     <section class="studio" aria-label="Customize and vote">
       <div class="collection-bar"><div><span class="step">01</span><label for="productPicker">Choose a design</label></div><select id="productPicker" aria-label="Choose a product"></select><span id="cardPosition" class="muted"></span><a class="insights-link" href="./admin.html">Results ↗</a></div>
       <article class="product-card" id="voteCard">
@@ -26,5 +27,5 @@
     <footer class="page-footer"><p>Prototype votes stay in this browser · Original voting data stays separate</p></footer>
     <p id="status" class="status" role="status" aria-live="polite"></p>
   </main>
-  <script src="./catalog.js"></script><script src="./store.js"></script><script src="./app.js"></script>
+  <script src="./preview-config.js"></script><script src="./catalog.js"></script><script src="./store.js"></script><script src="./app.js"></script>
 </body></html>
