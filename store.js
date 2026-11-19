@@ -1,10 +1,9 @@
 /* Separate database: production's merch-mockup-voter is only read on explicit import. */
 (function (root) {
   'use strict';
-  const PUBLIC_DEMO = root.MERCH_PUBLIC_DEMO === true;
-  const DB_NAME = PUBLIC_DEMO ? 'mustang-market-public-demo-v1' : 'mustang-market-utokyo-design-lab-v1';
+  const DB_NAME = 'mustang-market-utokyo-design-lab-v1';
   const KEY = 'prototype';
-  const blank = () => ({ schemaVersion: 2, votes: [], demoVotes: PUBLIC_DEMO ? makeDemo(root.DESIGN_CATALOG, 30) : [], originalSnapshot: null, currentIndex: 0, round: 0 });
+  const blank = () => ({ schemaVersion: 2, votes: [], demoVotes: [], originalSnapshot: null, currentIndex: 0, round: 0 });
   let connection;
   const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(DB_NAME) : null;
   function open() {
@@ -61,7 +60,6 @@
     return saved || JSON.parse(localStorage.getItem('merch-mockup-voter:v1') || 'null');
   }
   async function importOriginal() {
-    if (PUBLIC_DEMO) throw new Error('Original records cannot be imported into this public demonstration.');
     const original = await readOriginal();
     if (!original || !Array.isArray(original.designs)) throw new Error('No original records found on this browser and site address. Open the prototype on the same origin as the original to copy its records.');
     return update((state) => {
@@ -70,7 +68,6 @@
     });
   }
   function summarize(state, catalog, demo = false) {
-    demo = PUBLIC_DEMO || demo;
     const ledger = demo ? state.demoVotes : state.votes;
     const legacy = demo ? [] : state.originalSnapshot?.data?.designs || [];
     // Keep records for products that may have been removed from the current catalog.
@@ -101,21 +98,21 @@
         legacyTotal: original ? original.votes.reject + original.votes.like + original.votes.love : 0 };
     }).sort((a, b) => Number(b.total > 0) - Number(a.total > 0) || b.score - a.score || b.positive - a.positive || a.name.localeCompare(b.name));
   }
-  function makeDemo(catalog, participants = null) {
+  function makeDemo(catalog) {
     const records = [];
     catalog.forEach((design, i) => {
-      const count = participants || 16 + ((i * 13) % 31);
+      const count = 16 + ((i * 13) % 31);
       for (let n = 0; n < count; n += 1) {
         records.push({ id: `demo-${i}-${n}`, productId: design.id,
-          type: participants ? (i === 5 ? (n < 2 ? 'reject' : n < 12 ? 'like' : 'love') : (n % 10 < i % 4 + 1 ? 'reject' : n % 10 < 7 ? 'like' : 'love')) : (n % 7 < 2 ? 'reject' : n % 7 < 5 ? 'like' : 'love'),
-          preferences: { color: design.colors[participants ? (n % 10 < 6 ? 2 : n % 10 < 9 ? 0 : 3) : (n % 5 < 3 ? 0 : n % design.colors.length)],
+          type: n % 7 < 2 ? 'reject' : n % 7 < 5 ? 'like' : 'love',
+          preferences: { color: design.colors[n % 5 < 3 ? 0 : n % design.colors.length],
             fit: design.fits[n % 4 < 3 ? 1 : 0], size: design.sizes[n % 4 < 3 ? 2 : 3] },
-          at: '2026-01-01T12:00:00.000Z', round: Math.floor(n / catalog.length) + 1, participantId: participants ? `simulated-${n + 1}` : null, source: 'demonstration' });
+          at: '2026-01-01T12:00:00.000Z', round: Math.floor(n / catalog.length) + 1, source: 'demonstration' });
       }
     });
     return records;
   }
   root.MerchStore = { DB_NAME, read, update, importOriginal, summarize, makeDemo,
-    reset: () => update(s => { s.votes = []; s.demoVotes = PUBLIC_DEMO ? makeDemo(root.DESIGN_CATALOG, 30) : []; s.currentIndex = 0; s.round = 0; }),
+    reset: () => update(s => { s.votes = []; s.demoVotes = []; s.currentIndex = 0; s.round = 0; }),
     subscribe: (fn) => { if (channel) channel.onmessage = fn; } };
 })(typeof window !== 'undefined' ? window : globalThis);

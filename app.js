@@ -87,8 +87,8 @@ async function vote(type) {
   const selected = { ...preferences };
   try {
     state = await MerchStore.update(s => {
-      (window.MERCH_PUBLIC_DEMO ? s.demoVotes : s.votes).push({ id: crypto.randomUUID(), productId: design.id, type, preferences: selected,
-        at: new Date().toISOString(), round: s.round + 1, source: window.MERCH_PUBLIC_DEMO ? 'demonstration-interaction' : 'prototype' });
+      s.votes.push({ id: crypto.randomUUID(), productId: design.id, type, preferences: selected,
+        at: new Date().toISOString(), round: s.round + 1, source: 'prototype' });
       s.currentIndex = nextIndex;
       if (nextIndex === 0) s.round += 1;
     });
@@ -101,7 +101,7 @@ async function vote(type) {
     surface.classList.remove('voted-reject', 'voted-like', 'voted-love');
     $('#voteBadge').className = 'vote-badge';
     render();
-    announce(`${window.MERCH_PUBLIC_DEMO ? 'Rehearsal: ' : ''}${type[0].toUpperCase() + type.slice(1)} saved for ${design.name}${Object.values(selected).some(Boolean) ? ` · ${Object.values(selected).filter(Boolean).join(' / ')}` : ' · no preferences selected'}.`);
+    announce(`${type[0].toUpperCase() + type.slice(1)} saved for ${design.name}${Object.values(selected).some(Boolean) ? ` · ${Object.values(selected).filter(Boolean).join(' / ')}` : ' · no preferences selected'}.`);
   } catch (error) {
     surface.style.transform = '';
     $('#voteBadge').className = 'vote-badge';
@@ -167,13 +167,10 @@ catalog.forEach(design => { const option = document.createElement('option'); opt
 window.merchVotingAdmin = {
   results: async () => MerchStore.summarize(await MerchStore.read(), catalog),
   resetVotes: async () => {
-    if (!confirm(window.MERCH_PUBLIC_DEMO ? 'Reset rehearsal votes and restore the simulated 30-student scenario?' : 'Reset prototype votes? Copied original records and production data will be kept.')) return;
-    await MerchStore.reset(); currentIndex = 0; render(); announce(window.MERCH_PUBLIC_DEMO ? 'Simulated scenario restored.' : 'Prototype votes reset. Original records preserved.');
+    if (!confirm('Reset prototype votes? Copied original records and production data will be kept.')) return;
+    await MerchStore.reset(); currentIndex = 0; render(); announce('Prototype votes reset. Original records preserved.');
   },
 };
-if (window.MERCH_PUBLIC_DEMO) {
-  document.querySelector('.page-footer p').textContent = 'Public demonstration · Simulated results + your local rehearsal votes · No real student records';
-}
 MerchStore.read().then(saved => {
   state = saved; currentIndex = Math.max(0, saved.currentIndex % catalog.length); render(); setBusy(false);
 }).catch(error => { render(); setBusy(true); announce(`Storage unavailable. Voting is disabled to avoid losing your votes. ${error.message}`, true); });

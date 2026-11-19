@@ -2,7 +2,7 @@
 const catalog = window.DESIGN_CATALOG;
 const $ = selector => document.querySelector(selector);
 let statusTimer;
-let state, demo = window.MERCH_PUBLIC_DEMO === true, selectedId = catalog.find(d => d.kind === 'hoodie').id;
+let state, demo = false, selectedId = catalog.find(d => d.kind === 'hoodie').id;
 function announce(message, error = false) { clearTimeout(statusTimer); $('#status').textContent = message; $('#status').classList.toggle('error', error); if (!error) statusTimer = setTimeout(() => { $('#status').textContent = ''; }, 6000); }
 function node(tag, className, text) { const el = document.createElement(tag); if (className) el.className = className; if (text !== undefined) el.textContent = text; return el; }
 function entries(counts) { return Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])); }
@@ -64,13 +64,7 @@ function render() {
   $('#realData').setAttribute('aria-pressed', String(!demo)); $('#demoData').setAttribute('aria-pressed', String(demo));
   $('#roundStatus').textContent = `Prototype deck cycles: ${state.round} · Original completed rounds: ${state.originalSnapshot?.data?.round || 0}. Choosing products manually can skip parts of a cycle.`;
   $('#importStatus').textContent = state.originalSnapshot ? `Original snapshot preserved · copied ${new Date(state.originalSnapshot.importedAt).toLocaleDateString()}` : 'No original records copied yet.';
-  $('#importOriginal').disabled = window.MERCH_PUBLIC_DEMO || !!state.originalSnapshot;
-  if (window.MERCH_PUBLIC_DEMO) {
-    $('#datasetLabel').textContent = 'SIMULATED + LOCAL REHEARSAL INPUTS';
-    $('#demoBanner').textContent = 'PUBLIC DEMO · 30 simulated students × 12 designs = 360 sample votes, plus any rehearsal votes you cast on this device. Not real student responses.';
-    $('#importStatus').textContent = 'Original-record import is disabled. This site has its own demo database.';
-    $('#roundStatus').textContent = `Local rehearsal deck cycles: ${state.round}`;
-  }
+  $('#importOriginal').disabled = !!state.originalSnapshot;
   const list = $('#resultsList'); list.replaceChildren();
   const max = Math.max(1, ...rows.map(d => Math.abs(d.score)));
   rows.forEach((design, index) => {
@@ -99,8 +93,8 @@ $('#importOriginal').addEventListener('click', async () => {
   catch (error) { announce(error.message, true); }
 });
 $('#resetPrototype').addEventListener('click', async () => {
-  if (!confirm(window.MERCH_PUBLIC_DEMO ? 'Restore the 30-student simulated scenario and clear this device’s rehearsal votes?' : 'Reset all new prototype votes and generated demonstration data? Copied original records and the production database will remain untouched. Export JSON first if you want to keep prototype votes.')) return;
-  try { state = await MerchStore.reset(); demo = window.MERCH_PUBLIC_DEMO === true; render(); announce(window.MERCH_PUBLIC_DEMO ? 'Simulated scenario restored. Rehearsal votes cleared.' : 'Prototype votes reset. Copied original records and production data preserved.'); }
+  if (!confirm('Reset all new prototype votes and generated demonstration data? Copied original records and the production database will remain untouched. Export JSON first if you want to keep prototype votes.')) return;
+  try { state = await MerchStore.reset(); demo = false; render(); announce('Prototype votes reset. Copied original records and production data preserved.'); }
   catch (error) { announce(`Reset failed. ${error.message}`, true); }
 });
 $('#exportResults').addEventListener('click', async () => {
@@ -115,16 +109,6 @@ $('#exportResults').addEventListener('click', async () => {
     announce('Exported prototype votes, demonstration data, and any copied original records.');
   } catch (error) { announce(`Export failed. ${error.message}`, true); }
 });
-if (window.MERCH_PUBLIC_DEMO) {
-  $('#realData').hidden = true;
-  $('#demoData').textContent = 'Simulated results';
-  $('#importOriginal').hidden = true;
-  $('#resetPrototype').textContent = 'Restore sample data';
-  document.querySelector('.tools-body h3').textContent = 'A safe rehearsal space';
-  document.querySelector('.tools-body p').textContent = 'This public preview starts with a simulated 30-student scenario. Your taps and swipes add local rehearsal votes. Restore sample data to start again; no production records are accessed.';
-  document.querySelector('.data-tools summary').textContent = 'Demo data tools';
-  document.querySelector('.page-footer p:last-child').textContent = 'Simulated data only · Stored on this device · No shared collection';
-}
 document.querySelectorAll('button').forEach(button => { button.disabled = true; });
 MerchStore.subscribe(refresh);
 window.addEventListener('focus', refresh);
